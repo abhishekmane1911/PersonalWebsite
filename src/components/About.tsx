@@ -2,7 +2,7 @@ import { motion } from 'framer-motion';
 import { FiUser, FiCode, FiCoffee, FiAward, FiGithub } from 'react-icons/fi';
 import { GitHubCalendar } from 'react-github-calendar';
 import SectionHeading from './SectionHeading';
-import profilePic from '../public/pic.jpg';
+import profilePic from '../../public/pic.jpg';
 
 const stats = [
     { icon: <FiCode />, value: '28+', label: 'Projects' },
