@@ -48,7 +48,6 @@ const RollingDigit = ({ digit, delay }: { digit: string; delay: number }) => {
     );
 };
 
-/* ── Counter row (e.g. "2024") ── */
 const CounterRow = ({ text, delay, size = 'text-6xl' }: {
     text: string;
     delay: number;
@@ -61,7 +60,6 @@ const CounterRow = ({ text, delay, size = 'text-6xl' }: {
     </div>
 );
 
-/* ── Animated scanning line ── */
 const ScanLine = () => (
     <motion.div
         className="absolute left-0 right-0 h-[1px] pointer-events-none z-20"
@@ -198,14 +196,14 @@ const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
                                 <CounterRow text="2026" delay={200} size="text-7xl md:text-9xl" />
                             </div>
 
-                            <motion.div
+                            {/* <motion.div
                                 className="text-xl md:text-2xl font-mono font-light tracking-[0.5em] text-white/30 uppercase"
                                 initial={{ opacity: 0, letterSpacing: '1em' }}
                                 animate={{ opacity: 1, letterSpacing: '0.5em' }}
                                 transition={{ delay: 0.8, duration: 0.8 }}
                             >
                                 Abhishek
-                            </motion.div>
+                            </motion.div> */}
                         </div>
 
                         {/* Progress bar */}
