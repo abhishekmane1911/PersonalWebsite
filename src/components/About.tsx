@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { FiUser, FiCode, FiCoffee, FiAward, FiGithub } from 'react-icons/fi';
 import { GitHubCalendar } from 'react-github-calendar';
 import SectionHeading from './SectionHeading';
+import profilePic from '../public/pic.jpg';
 
 const stats = [
     { icon: <FiCode />, value: '28+', label: 'Projects' },
@@ -39,7 +40,7 @@ const About = () => {
                                 <div className="w-full h-full bg-gradient-to-br from-violet-600/20 via-dark-800 to-cyan-500/20 flex items-center justify-center">
                                     <div className="text-center">
                                         {/* <span className="text-7xl md:text-8xl font-heading font-bold gradient-text">AM</span> */}
-                                        <img src="/pic.jpg" alt="" />
+                                        <img src={profilePic} alt="Profile" />
                                         <p className="text-gray-500 text-sm mt-2 font-mono">{'< developer />'}</p>
                                     </div>
                                 </div>
