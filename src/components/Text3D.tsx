@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { motion, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import type { ReactNode } from 'react';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface Text3DProps {
     children: ReactNode;
@@ -8,6 +9,7 @@ interface Text3DProps {
 
 const Text3D = ({ children }: Text3DProps) => {
     const ref = useRef<HTMLDivElement>(null);
+    const isMobile = useIsMobile();
 
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -19,6 +21,8 @@ const Text3D = ({ children }: Text3DProps) => {
     const rotateY = useTransform(springX, [0, typeof window !== 'undefined' ? window.innerWidth : 1000], [-25, 25]);
 
     useEffect(() => {
+        if (isMobile) return; // Skip mouse tracking on mobile
+
         const w = window.innerWidth;
         const h = window.innerHeight;
         x.set(w / 2);
@@ -41,20 +45,20 @@ const Text3D = ({ children }: Text3DProps) => {
             document.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('resize', handleResize);
         };
-    }, [x, y]);
+    }, [x, y, isMobile]);
 
     return (
         <div
             ref={ref}
-            className="w-full py-16 flex items-center justify-center [perspective:2000px]"
+            className="w-full py-8 sm:py-16 flex items-center justify-center [perspective:2000px]"
         >
             <motion.h1
-                style={{
+                style={isMobile ? {} : {
                     rotateX,
                     rotateY,
                     transformStyle: 'preserve-3d',
                 }}
-                className="text-5xl md:text-7xl font-heading font-bold text-white [transform-style:preserve-3d] will-change-transform"
+                className="text-3xl sm:text-5xl md:text-7xl font-heading font-bold text-white [transform-style:preserve-3d] will-change-transform"
             >
                 {children}
             </motion.h1>

@@ -2,6 +2,7 @@ import { useRef, useMemo, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Float, MeshDistortMaterial } from '@react-three/drei';
 import * as THREE from 'three';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 /* ── Mouse-tracking camera rig ── */
 const CameraRig = () => {
@@ -142,6 +143,11 @@ const OrbitRing = ({ radius, speed, color, tilt }: {
 
 /* ── Main scene ── */
 const HeroScene = () => {
+    const isMobile = useIsMobile();
+
+    // Skip heavy Three.js rendering on mobile devices
+    if (isMobile) return null;
+
     return (
         <div className="absolute inset-0 z-0">
             <Canvas

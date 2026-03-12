@@ -43,9 +43,9 @@ const Footer = () => {
     };
 
     return (
-        <footer ref={ref} className="bg-[#030014] text-white font-sans pt-20">
+        <footer ref={ref} className="bg-[#030014] text-white font-sans pt-12 sm:pt-20 overflow-hidden">
             <div
-                className="relative max-w-7xl mx-auto rounded-t-3xl bg-indigo-600/90 p-8 md:p-16
+                className="relative max-w-7xl mx-auto rounded-t-3xl bg-indigo-600/90 p-6 sm:p-8 md:p-16
           before:absolute before:inset-0 before:content-[''] 
           before:bg-[url('/noise_texture_2.png')] before:opacity-65 before:z-0
           before:rounded-t-3xl"
@@ -67,7 +67,7 @@ const Footer = () => {
                     initial="hidden"
                     animate={mainControls}
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-12 md:mb-16">
 
                         <motion.div className="space-y-4" variants={itemVariants}>
                             <h3 className="text-xl font-bold text-white/90">
@@ -131,7 +131,7 @@ const Footer = () => {
                     </div>
 
                     {/* 3D Name */}
-                    <motion.div className="text-center my-12 md:my-20" variants={itemVariants}>
+                    <motion.div className="text-center my-6 sm:my-12 md:my-20" variants={itemVariants}>
                         <Text3D>
                             {siteConfig.name}
                         </Text3D>

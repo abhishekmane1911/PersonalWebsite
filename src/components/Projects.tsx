@@ -346,7 +346,7 @@ const Projects = () => {
     const [selectedProject, setSelectedProject] = useState<number | null>(null);
 
     return (
-        <section id="projects" className="section-padding relative">
+        <section id="projects" className="section-padding relative overflow-hidden">
             <div className="absolute top-1/3 right-0 w-96 h-96 bg-magenta-500/5 rounded-full blur-[120px]" />
 
             <div className="max-w-7xl mx-auto relative z-10">

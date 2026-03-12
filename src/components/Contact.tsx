@@ -34,7 +34,7 @@ const Contact = () => {
     ];
 
     return (
-        <section id="contact" className="section-padding relative">
+        <section id="contact" className="section-padding relative overflow-hidden">
             <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-violet-600/5 rounded-full blur-[120px]" />
             <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-cyan-500/5 rounded-full blur-[100px]" />
 
@@ -45,7 +45,7 @@ const Contact = () => {
                     icon={<FiMail />}
                 />
 
-                <div className="grid md:grid-cols-2 gap-12">
+                <div className="grid md:grid-cols-2 gap-8 md:gap-12">
                     {/* Contact Info */}
                     <motion.div
                         initial={{ opacity: 0, x: -40 }}

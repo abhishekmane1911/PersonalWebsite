@@ -1,9 +1,13 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const ParticleBackground = () => {
+    const isMobile = useIsMobile();
+    const particleCount = isMobile ? 15 : 50;
+
     const particles = useMemo(() => {
-        return Array.from({ length: 50 }, (_, i) => ({
+        return Array.from({ length: particleCount }, (_, i) => ({
             id: i,
             x: Math.random() * 100,
             y: Math.random() * 100,
@@ -12,7 +16,7 @@ const ParticleBackground = () => {
             delay: Math.random() * 10,
             opacity: Math.random() * 0.3 + 0.05,
         }));
-    }, []);
+    }, [particleCount]);
 
     return (
         <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">

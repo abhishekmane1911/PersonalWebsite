@@ -70,7 +70,7 @@ const Hero = () => {
 
                 {/* Name */}
                 <motion.h1
-                    className="font-heading text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+                    className="font-heading text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.5, delay: 0.4 }}
@@ -102,7 +102,7 @@ const Hero = () => {
                     transition={{ duration: 0.8, delay: 1.2 }}
                     className="mb-8"
                 >
-                    <p className="text-xl md:text-2xl text-gray-300 font-light">
+                    <p className="text-lg sm:text-xl md:text-2xl text-gray-300 font-light">
                         I'm a{' '}
                         <span className="font-mono text-cyan-400 font-medium">
                             {displayText}

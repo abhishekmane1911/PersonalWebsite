@@ -44,16 +44,20 @@ function App() {
       {/* Loading Screen */}
       <LoadingScreen onComplete={handleLoadingComplete} />
 
-      <div className={`relative min-h-screen bg-dark-950 ${isLoading ? 'overflow-hidden h-screen' : ''}`}>
+      <div className={`relative min-h-screen bg-dark-950 overflow-x-clip ${isLoading ? 'overflow-hidden h-screen' : ''}`}>
         {/* Noise Overlay */}
         <div className="noise-overlay" />
 
         {/* Particle Background */}
         <ParticleBackground />
 
+        {/* Global top-left violet glow — visible across the whole site */}
+        <div className="fixed -top-32 -left-32 w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] bg-violet-500/[0.10] rounded-full blur-[100px] sm:blur-[150px] pointer-events-none z-0" />
+
         {/* Main Content */}
         <Navbar />
         <main>
+
           <Hero />
           <About />
           <Skills />

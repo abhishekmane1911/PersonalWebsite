@@ -78,7 +78,7 @@ const ExperienceCard = ({ exp, index, isActive, onClick }: {
                     {/* Header */}
                     <div className="flex items-start justify-between mb-4">
                         <div>
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-2 mb-2 flex-wrap">
                                 <span className="px-2.5 py-1 text-[11px] font-mono rounded-lg bg-white/5 border border-white/10 text-gray-400 flex items-center gap-1.5">
                                     <FiCalendar className="text-[10px]" />
                                     {exp.period}
@@ -163,7 +163,7 @@ const Experience = () => {
     const [activeIndex, setActiveIndex] = useState(0);
 
     return (
-        <section id="experience" className="section-padding relative">
+        <section id="experience" className="section-padding relative overflow-hidden">
             <div className="absolute bottom-1/3 left-0 w-80 h-80 bg-violet-600/5 rounded-full blur-[120px]" />
             <div className="absolute top-1/4 right-0 w-60 h-60 bg-cyan-500/5 rounded-full blur-[100px]" />
 
@@ -179,7 +179,7 @@ const Experience = () => {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="grid grid-cols-3 gap-4 mb-12"
+                    className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-12"
                 >
                     {[
                         { label: 'Years Active', value: '4+', color: '#8b5cf6' },

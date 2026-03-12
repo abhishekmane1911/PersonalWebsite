@@ -13,7 +13,7 @@ const stats = [
 
 const About = () => {
     return (
-        <section id="about" className="section-padding relative">
+        <section id="about" className="section-padding relative overflow-hidden">
             {/* Background decoration */}
             <div className="absolute top-0 right-0 w-72 h-72 bg-violet-600/5 rounded-full blur-[100px]" />
             <div className="absolute bottom-0 left-0 w-72 h-72 bg-cyan-500/5 rounded-full blur-[100px]" />
@@ -36,7 +36,7 @@ const About = () => {
                     >
                         <div className="relative">
                             {/* Glowing border */}
-                            <div className="w-72 h-72 md:w-80 md:h-80 rounded-2xl gradient-border glass overflow-hidden">
+                            <div className="w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-2xl gradient-border glass overflow-hidden">
                                 <div className="w-full h-full bg-gradient-to-br from-violet-600/20 via-dark-800 to-cyan-500/20 flex items-center justify-center">
                                     <div className="text-center">
                                         {/* <span className="text-7xl md:text-8xl font-heading font-bold gradient-text">AM</span> */}
@@ -46,25 +46,25 @@ const About = () => {
                                 </div>
                             </div>
 
-                            {/* Floating badges */}
+                            {/* Floating badges — hidden on small screens to prevent overflow */}
                             <motion.div
                                 animate={{ y: [0, -10, 0] }}
                                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                                className="absolute -top-4 -right-4 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-violet-400"
+                                className="hidden md:block absolute -top-4 -right-4 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-violet-400"
                             >
                                 React.tsx
                             </motion.div>
                             <motion.div
                                 animate={{ y: [0, 10, 0] }}
                                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                                className="absolute -bottom-4 -left-4 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-cyan-400"
+                                className="hidden md:block absolute -bottom-4 -left-4 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-cyan-400"
                             >
                                 Python.py
                             </motion.div>
                             <motion.div
                                 animate={{ y: [0, -8, 0] }}
                                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-                                className="absolute top-1/2 -right-8 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-magenta-400"
+                                className="hidden md:block absolute top-1/2 -right-8 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-magenta-400"
                             >
                                 AI/ML
                             </motion.div>
@@ -152,7 +152,7 @@ const About = () => {
                             View Profile
                         </a>
                     </div> */}
-                    <div className="flex justify-center overflow-x-auto py-2 custom-scrollbar">
+                    <div className="flex justify-center overflow-x-auto py-2 custom-scrollbar -mx-4 px-4">
                         <a href="https://github.com/abhishekmane1911" target="_blank" rel="noopener noreferrer">
                             <GitHubCalendar
                                 username="abhishekmane1911"
