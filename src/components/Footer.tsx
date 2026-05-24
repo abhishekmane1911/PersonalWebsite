@@ -1,100 +1,115 @@
 import { useRef, useEffect, useState } from 'react';
 import { motion, useInView, useAnimation } from 'framer-motion';
-import { Mail } from 'lucide-react';
+import { FiArrowUpRight, FiMail } from 'react-icons/fi';
 import Text3D from './Text3D';
 import RollingText from './RollingText';
 import { siteConfig, socialLinks, navItems } from '../config/site';
 
+/* ── Inline SVG noise texture (no external asset dependency) ── */
+const InlineNoise = () => (
+    <svg
+        className="absolute inset-0 w-full h-full opacity-[0.06] pointer-events-none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ zIndex: 0 }}
+    >
+        <filter id="footer-noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" />
+        </filter>
+        <rect width="100%" height="100%" filter="url(#footer-noise)" />
+    </svg>
+);
+
 const Footer = () => {
     const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-
     const ref = useRef(null);
-    const isInView = useInView(ref, { once: true, amount: 0.3 });
-    const mainControls = useAnimation();
+    const isInView = useInView(ref, { once: true, amount: 0.2 });
+    const controls = useAnimation();
 
     useEffect(() => {
-        if (isInView) {
-            mainControls.start('visible');
-        }
-    }, [isInView, mainControls]);
+        if (isInView) controls.start('visible');
+    }, [isInView, controls]);
 
     const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.2 },
-        },
+        hidden:  { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
     };
-
     const itemVariants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: {
-            opacity: 1,
-            y: 0,
-            transition: { type: 'spring' as const, stiffness: 100, damping: 20 },
-        },
+        hidden:  { opacity: 0, y: 24 },
+        visible: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 100, damping: 20 } },
     };
 
     const handleNavClick = (href: string) => {
-        const el = document.querySelector(href);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
-        }
+        document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
     };
 
     return (
-        <footer ref={ref} className="bg-[#030014] text-white font-sans pt-12 sm:pt-20 overflow-hidden">
-            <div
-                className="relative max-w-7xl mx-auto rounded-t-3xl bg-indigo-600/90 p-6 sm:p-8 md:p-16
-          before:absolute before:inset-0 before:content-[''] 
-          before:bg-[url('/noise_texture_2.png')] before:opacity-65 before:z-0
-          before:rounded-t-3xl"
-            // style={{
-            //     background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.85), rgba(37, 99, 235, 0.8), rgba(6, 182, 212, 0.75))',
-            // }}
+        <footer ref={ref} style={{ background: 'var(--color-bg)' }} className="text-white overflow-hidden">
+            {/* ── Divider line ── */}
+            <div className="max-w-7xl mx-auto px-5 sm:px-8 md:px-14 lg:px-24">
+                <div className="h-px" style={{ background: 'var(--color-border)' }} />
+            </div>
+
+            {/* ── Main footer block ── */}
+            <div className="relative max-w-7xl mx-auto rounded-t-3xl mt-0 overflow-hidden"
+                style={{ background: '#0E0E0E' }}
             >
-                {/* Noise texture overlay */}
-                {/* <div
-                    className="absolute inset-0 z-0 opacity-30 rounded-t-3xl"
-                    style={{
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-                    }}
-                /> */}
+                <InlineNoise />
+
+                {/* Amber top accent strip */}
+                <div
+                    className="absolute top-0 left-0 right-0 h-[2px]"
+                    style={{ background: 'linear-gradient(90deg, transparent, var(--color-accent), transparent)' }}
+                />
 
                 <motion.div
-                    className="relative z-10"
+                    className="relative z-10 p-8 md:p-14 lg:p-16"
                     variants={containerVariants}
                     initial="hidden"
-                    animate={mainControls}
+                    animate={controls}
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-12 md:mb-16">
+                    {/* ── Top grid: tagline + nav + connect ── */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-14 mb-14 md:mb-20">
 
-                        <motion.div className="space-y-4" variants={itemVariants}>
-                            <h3 className="text-xl font-bold text-white/90">
-                                Let's build something amazing together.
-                            </h3>
+                        {/* Tagline + email */}
+                        <motion.div className="space-y-5" variants={itemVariants}>
+                            <span
+                                className="font-display font-bold block"
+                                style={{ fontSize: '1.1rem', letterSpacing: '-0.02em', color: '#FFFFFF' }}
+                            >
+                                Let's build something great together.
+                            </span>
                             <motion.a
                                 href={siteConfig.email}
-                                className="inline-flex items-center gap-2 text-white/70"
-                                whileHover={{ color: '#FFFFFF', x: 5, transition: { duration: 0.2 } }}
+                                className="inline-flex items-center gap-2 font-sans text-sm group"
+                                style={{ color: 'var(--color-text-2)' }}
+                                whileHover={{ x: 4, color: '#FFFFFF' } as any}
+                                transition={{ duration: 0.2 }}
                             >
-                                <Mail size={18} />
+                                <FiMail className="shrink-0" />
                                 <span>{siteConfig.emailDisplay}</span>
+                                <FiArrowUpRight
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                    style={{ color: 'var(--color-accent)' }}
+                                />
                             </motion.a>
                         </motion.div>
 
                         {/* Navigate */}
                         <motion.div className="md:mx-auto" variants={itemVariants}>
-                            <h4 className="font-semibold text-white/60 mb-4 text-sm uppercase tracking-wider font-mono">
-                                {'{ NAVIGATE }'}
+                            <h4
+                                className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5"
+                                style={{ color: 'var(--color-text-2)' }}
+                            >
+                                Navigate
                             </h4>
-                            <ul className="space-y-2">
+                            <ul className="space-y-2.5">
                                 {navItems.map((item) => (
                                     <li key={item.name}>
                                         <a
                                             href={item.href}
                                             onClick={(e) => { e.preventDefault(); handleNavClick(item.href); }}
-                                            className="text-white/70 hover:text-white transition-colors cursor-pointer"
+                                            className="font-sans text-sm cursor-pointer transition-colors duration-200"
+                                            style={{ color: 'var(--color-text-2)' }}
                                             onMouseEnter={() => setHoveredItem(item.name)}
                                             onMouseLeave={() => setHoveredItem(null)}
                                         >
@@ -107,8 +122,11 @@ const Footer = () => {
 
                         {/* Connect */}
                         <motion.div className="md:mx-auto" variants={itemVariants}>
-                            <h4 className="font-semibold text-white/60 mb-4 text-sm uppercase tracking-wider font-mono">
-                                {'{ CONNECT }'}
+                            <h4
+                                className="font-mono text-[10px] uppercase tracking-[0.3em] mb-5"
+                                style={{ color: 'var(--color-text-2)' }}
+                            >
+                                Connect
                             </h4>
                             <ul className="space-y-3">
                                 {socialLinks.map((social) => (
@@ -117,12 +135,13 @@ const Footer = () => {
                                             href={social.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="flex items-center gap-3 text-white/70 hover:text-white transition-colors"
+                                            className="flex items-center gap-3 font-sans text-sm transition-colors duration-200"
+                                            style={{ color: 'var(--color-text-2)' }}
                                             onMouseEnter={() => setHoveredItem(social.name)}
                                             onMouseLeave={() => setHoveredItem(null)}
                                         >
                                             {social.icon}
-                                            <RollingText text={`${social.name}.connect()`} isHovered={hoveredItem === social.name} />
+                                            <RollingText text={social.name} isHovered={hoveredItem === social.name} />
                                         </a>
                                     </li>
                                 ))}
@@ -130,17 +149,22 @@ const Footer = () => {
                         </motion.div>
                     </div>
 
-                    {/* 3D Name */}
-                    <motion.div className="text-center my-6 sm:my-12 md:my-20" variants={itemVariants}>
-                        <Text3D>
-                            {siteConfig.name}
-                        </Text3D>
+                    {/* ── 3D Name — hero moment ── */}
+                    <motion.div className="my-6 md:my-12" variants={itemVariants}>
+                        <Text3D>{siteConfig.name}</Text3D>
                     </motion.div>
 
-                    {/* Bottom */}
-                    <motion.div className="text-center border-t border-white/15 pt-8" variants={itemVariants}>
-                        <p className="text-sm text-white/40">
-                            &copy; {new Date().getFullYear()} {siteConfig.name}. Crafted with passion & code.
+                    {/* ── Bottom bar ── */}
+                    <motion.div
+                        className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8"
+                        style={{ borderTop: '1px solid var(--color-border)' }}
+                        variants={itemVariants}
+                    >
+                        <p className="font-mono text-[11px]" style={{ color: 'var(--color-text-3)' }}>
+                            © {new Date().getFullYear()} Abhishek Mane — Built with React & Framer Motion
+                        </p>
+                        <p className="font-mono text-[11px]" style={{ color: 'var(--color-text-3)' }}>
+                            Designed & Developed with care
                         </p>
                     </motion.div>
                 </motion.div>

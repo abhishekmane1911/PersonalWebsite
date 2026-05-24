@@ -1,269 +1,489 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-/* ── Animated rolling digit ── */
-const RollingDigit = ({ digit, delay }: { digit: string; delay: number }) => {
-    const [isVisible, setIsVisible] = useState(false);
+/* ── Google Fonts ── */
+const FontLoader = () => (
+    <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@300;400&display=swap');
+    `}</style>
+);
+
+/* ── Characters used during scramble ── */
+const CHARSET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%!?><[]{}~';
+const rand = () => CHARSET[Math.floor(Math.random() * CHARSET.length)];
+
+/* ── Status messages that cycle during load ── */
+const STATUS = [
+    'INITIALIZING_RUNTIME',
+    'MOUNTING_COMPONENTS',
+    'LOADING_ASSETS',
+    'RESOLVING_MODULES',
+    'COMPILING_SHADERS',
+    'SYSTEM_READY',
+];
+
+/* ──────────────────────────────────────────
+   ScrambleChar
+   A single character that starts as random
+   flicker, then snaps to target with a brief
+   RGB chromatic-aberration split.
+   ────────────────────────────────────────── */
+const ScrambleChar = ({
+    target,
+    startDelay,      // ms before scrambling begins
+    scrambleDuration, // ms of flickering before lock
+}: {
+    target: string;
+    startDelay: number;
+    scrambleDuration: number;
+}) => {
+    const [current, setCurrent] = useState('\u00A0'); // non-breaking space placeholder
+    const [phase, setPhase] = useState<'idle' | 'scrambling' | 'chromatic' | 'settled'>('idle');
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsVisible(true), delay);
-        return () => clearTimeout(timer);
-    }, [delay]);
+        if (target === ' ') {
+            setPhase('settled');
+            setCurrent(' ');
+            return;
+        }
 
-    const isNumber = !isNaN(Number(digit));
+        const startScramble = setTimeout(() => {
+            setPhase('scrambling');
+            intervalRef.current = setInterval(() => setCurrent(rand()), 55);
 
-    if (!isNumber) {
-        return (
-            <motion.span
-                className="inline-block"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isVisible ? 0.3 : 0 }}
-                transition={{ duration: 0.3 }}
-            >
-                {digit}
-            </motion.span>
-        );
+            const lockIn = setTimeout(() => {
+                if (intervalRef.current) clearInterval(intervalRef.current);
+                setCurrent(target);
+                setPhase('chromatic');
+
+                const settle = setTimeout(() => setPhase('settled'), 220);
+                return () => clearTimeout(settle);
+            }, scrambleDuration);
+
+            return () => clearTimeout(lockIn);
+        }, startDelay);
+
+        return () => {
+            clearTimeout(startScramble);
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    if (target === ' ') {
+        return <span style={{ display: 'inline-block', width: '0.25em' }} />;
     }
 
+    const isChromatic = phase === 'chromatic';
+
     return (
-        <span className="relative inline-block w-[1ch] h-[1.1em] overflow-hidden align-bottom">
-            <motion.span
-                className="absolute inset-0 flex flex-col items-center"
-                initial={{ y: '-900%' }}
-                animate={{ y: isVisible ? '0%' : '-900%' }}
-                transition={{
-                    duration: 1.2,
-                    delay: 0,
-                    ease: [0.16, 1, 0.3, 1],
+        <span
+            style={{
+                display: 'inline-block',
+                position: 'relative',
+            }}
+        >
+            {/* Red left ghost */}
+            <span
+                aria-hidden
+                style={{
+                    position: 'absolute',
+                    left: isChromatic ? '-5px' : '0px',
+                    top: 0,
+                    color: '#FF2020',
+                    opacity: isChromatic ? 0.8 : 0,
+                    transition: 'opacity 0.08s ease, left 0.08s ease',
+                    mixBlendMode: 'screen',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
                 }}
             >
-                {/* Roll through 0-9 then land on the target digit */}
-                {Array.from({ length: 10 }, (_, i) => (
-                    <span key={i} className="block h-[1.1em] leading-[1.1em]">
-                        {(Number(digit) + 10 - i) % 10}
-                    </span>
-                ))}
-            </motion.span>
+                {current}
+            </span>
+            {/* Blue right ghost */}
+            <span
+                aria-hidden
+                style={{
+                    position: 'absolute',
+                    left: isChromatic ? '5px' : '0px',
+                    top: 0,
+                    color: '#2070FF',
+                    opacity: isChromatic ? 0.8 : 0,
+                    transition: 'opacity 0.08s ease, left 0.08s ease',
+                    mixBlendMode: 'screen',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                }}
+            >
+                {current}
+            </span>
+            {/* Main glyph */}
+            <span
+                style={{
+                    color:
+                        phase === 'idle'
+                            ? 'transparent'
+                            : phase === 'scrambling'
+                                ? '#282828'
+                                : '#FFFFFF',
+                    transition: 'color 0.1s ease',
+                }}
+            >
+                {current}
+            </span>
         </span>
     );
 };
 
-const CounterRow = ({ text, delay, size = 'text-6xl' }: {
+/* ──────────────────────────────────────────
+   ScrambleWord  —  row of ScrambleChars
+   ────────────────────────────────────────── */
+const ScrambleWord = ({
+    text,
+    startDelay,
+    charDelay = 80,
+    scrambleDuration = 460,
+    fontSize,
+}: {
     text: string;
-    delay: number;
-    size?: string;
+    startDelay: number;
+    charDelay?: number;
+    scrambleDuration?: number;
+    fontSize: string;
 }) => (
-    <div className={`${size} font-mono font-bold tracking-tighter flex justify-center`}>
+    <div
+        style={{
+            display: 'flex',
+            fontFamily: "'Bebas Neue', sans-serif",
+            fontSize,
+            lineHeight: 0.86,
+            letterSpacing: '0.025em',
+        }}
+    >
         {text.split('').map((char, i) => (
-            <RollingDigit key={`${char}-${i}`} digit={char} delay={delay + i * 80} />
+            <ScrambleChar
+                key={i}
+                target={char}
+                startDelay={startDelay + i * charDelay}
+                scrambleDuration={scrambleDuration}
+            />
         ))}
     </div>
 );
 
-const ScanLine = () => (
-    <motion.div
-        className="absolute left-0 right-0 h-[1px] pointer-events-none z-20"
+/* ──────────────────────────────────────────
+   Electric spark progress line
+   ────────────────────────────────────────── */
+const SparkLine = ({ progress, visible }: { progress: number; visible: boolean }) => (
+    <div
         style={{
-            background: 'linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.4), transparent)',
+            position: 'relative',
+            width: '100%',
+            height: '1px',
+            background: 'rgba(255,255,255,0.05)',
+            opacity: visible ? 1 : 0,
+            transition: 'opacity 0.4s ease',
         }}
-        initial={{ top: '0%' }}
-        animate={{ top: '100%' }}
-        transition={{
-            duration: 2.5,
-            repeat: Infinity,
-            ease: 'linear',
-        }}
-    />
-);
-
-/* ── Grid lines background ── */
-const GridBackground = () => (
-    <div className="absolute inset-0 overflow-hidden opacity-[0.04]">
+    >
+        {/* Fill */}
         <div
-            className="absolute inset-0"
             style={{
-                backgroundImage: `
-                    linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)
-                `,
-                backgroundSize: '60px 60px',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                height: '100%',
+                width: `${progress}%`,
+                background: 'linear-gradient(90deg, rgba(255,200,0,0.3), #FFCC00)',
+                transition: 'width 0.1s linear',
+            }}
+        />
+        {/* Spark bead */}
+        <div
+            style={{
+                position: 'absolute',
+                top: '50%',
+                left: `${progress}%`,
+                width: '5px',
+                height: '5px',
+                borderRadius: '50%',
+                background: '#FFCC00',
+                transform: 'translate(-50%, -50%)',
+                boxShadow: '0 0 8px #FFCC00, 0 0 20px rgba(255,204,0,0.6)',
+                transition: 'left 0.1s linear',
+                display: progress === 0 ? 'none' : 'block',
             }}
         />
     </div>
 );
 
-/* ── Main loading screen ── */
-const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
-    const [phase, setPhase] = useState<'numbers' | 'exit' | 'done'>('numbers');
-    const [progress, setProgress] = useState(0);
-
-    const dataPoints = useMemo(() => [
-        { label: 'INIT', value: '00:01' },
-        { label: 'LOAD', value: '24.8K' },
-        { label: 'STAT', value: 'OK' },
-    ], []);
+/* ──────────────────────────────────────────
+   Cycling status text
+   ────────────────────────────────────────── */
+const StatusCycler = ({ visible }: { visible: boolean }) => {
+    const [idx, setIdx] = useState(0);
 
     useEffect(() => {
-        // Progress counter
-        const progressInterval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) return 100;
-                return prev + Math.random() * 8 + 2;
-            });
+        if (!visible) return;
+        const id = setInterval(() => setIdx(p => (p + 1) % STATUS.length), 340);
+        return () => clearInterval(id);
+    }, [visible]);
+
+    return (
+        <span
+            style={{
+                color: '#FFCC00',
+                opacity: visible ? 1 : 0,
+                transition: 'opacity 0.3s',
+            }}
+        >
+            {STATUS[idx]}
+        </span>
+    );
+};
+
+/* ──────────────────────────────────────────
+   Scanline overlay (subtle CRT texture)
+   ────────────────────────────────────────── */
+const Scanlines = () => (
+    <div
+        aria-hidden
+        style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage:
+                'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.12) 3px, rgba(0,0,0,0.12) 4px)',
+            pointerEvents: 'none',
+            zIndex: 2,
+        }}
+    />
+);
+
+/* ──────────────────────────────────────────
+   MAIN LOADING SCREEN
+   ────────────────────────────────────────── */
+const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
+    const [phase, setPhase] = useState<'loading' | 'crt-exit' | 'done'>('loading');
+    const [progress, setProgress] = useState(0);
+    const [progressVisible, setProgressVisible] = useState(false);
+    const [whiteFlash, setWhiteFlash] = useState(false);
+    const progressRef = useRef(0);
+
+    useEffect(() => {
+        // Smooth stochastic progress
+        const tick = setInterval(() => {
+            progressRef.current = Math.min(progressRef.current + Math.random() * 7 + 2, 100);
+            setProgress(Math.floor(progressRef.current));
+            if (progressRef.current >= 100) clearInterval(tick);
         }, 80);
 
-        // Exit phase
-        const exitTimer = setTimeout(() => setPhase('exit'), 2400);
-        // Done
-        const doneTimer = setTimeout(() => {
-            setPhase('done');
-            onComplete();
-        }, 3000);
+        // Show progress bar after name starts settling
+        const progressTimer = setTimeout(() => setProgressVisible(true), 1600);
+
+        // Trigger CRT collapse exit
+        const flashTimer = setTimeout(() => setWhiteFlash(true), 2700);
+        const exitTimer = setTimeout(() => setPhase('crt-exit'), 2800);
+        const doneTimer = setTimeout(() => { setPhase('done'); onComplete(); }, 3300);
 
         return () => {
-            clearInterval(progressInterval);
+            clearInterval(tick);
+            clearTimeout(progressTimer);
+            clearTimeout(flashTimer);
             clearTimeout(exitTimer);
             clearTimeout(doneTimer);
         };
     }, [onComplete]);
 
+    // Timing layout:
+    // 0ms     — screen mounts
+    // 150ms   — ABHISHEK starts scrambling (8 chars × 80ms + 460ms = ~1100ms total)
+    // 850ms   — MANE starts scrambling (4 chars × 85ms + 460ms = ~800ms total → done ~1650ms)
+    // 1600ms  — progress bar fades in
+    // 2700ms  — white flash
+    // 2800ms  — CRT collapse begins (scaleY → 0, ~500ms)
+    // 3300ms  — done, onComplete fires
+
     return (
         <AnimatePresence>
             {phase !== 'done' && (
                 <motion.div
-                    className="fixed inset-0 z-[9999] flex items-center justify-center select-none"
-                    style={{ backgroundColor: '#030014' }}
-                    exit={{ opacity: 0, scale: 1.05 }}
-                    transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                    style={{
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: 9999,
+                        background: '#0C0C0C',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        overflow: 'hidden',
+                        transformOrigin: '50% 50%',
+                    }}
+                    animate={
+                        phase === 'crt-exit'
+                            ? { scaleY: 0, opacity: 1 }
+                            : { scaleY: 1, opacity: 1 }
+                    }
+                    transition={
+                        phase === 'crt-exit'
+                            ? { duration: 0.45, ease: [0.76, 0, 0.24, 1] }
+                            : { duration: 0 }
+                    }
                 >
-                    <GridBackground />
-                    <ScanLine />
+                    <FontLoader />
+                    <Scanlines />
 
-                    {/* Corner data readouts */}
-                    <motion.div
-                        className="absolute top-6 left-6 font-mono text-[10px] text-white/20 space-y-1"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                    >
-                        {dataPoints.map((dp, i) => (
-                            <div key={dp.label} className="flex gap-3">
-                                <span className="text-violet-400/40">{dp.label}</span>
-                                <motion.span
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ delay: 0.5 + i * 0.2 }}
-                                >
-                                    {dp.value}
-                                </motion.span>
-                            </div>
-                        ))}
-                    </motion.div>
-
-                    <motion.div
-                        className="absolute top-6 right-6 font-mono text-[10px] text-white/20"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                    >
-                        <span className="text-violet-400/40">&lt;</span>
-                        portfolio.v2
-                        <span className="text-violet-400/40"> /&gt;</span>
-                    </motion.div>
-
-                    {/* Main content */}
-                    <motion.div
-                        className="relative z-10 flex flex-col items-center gap-8"
-                        animate={phase === 'exit' ? {
-                            scale: 0.95,
-                            opacity: 0,
-                            filter: 'blur(12px)',
-                        } : {}}
-                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                    >
-                        {/* Year-style rolling numbers */}
-                        <div className="flex flex-col items-center gap-2">
+                    {/* White flash overlay for CRT pop */}
+                    <AnimatePresence>
+                        {whiteFlash && (
                             <motion.div
-                                className="text-[10px] font-mono uppercase tracking-[0.3em] text-white/20"
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.2 }}
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    background: '#FFFFFF',
+                                    zIndex: 20,
+                                    pointerEvents: 'none',
+                                }}
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: [0, 0.7, 0] }}
+                                transition={{ duration: 0.18, times: [0, 0.35, 1] }}
+                            />
+                        )}
+                    </AnimatePresence>
+
+                    {/* ── Corner tags ── */}
+                    {/* <motion.div
+                        style={{
+                            position: 'absolute',
+                            top: '1.8rem',
+                            left: '2.2rem',
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '0.58rem',
+                            letterSpacing: '0.18em',
+                            color: '#2A2A2A',
+                            textTransform: 'uppercase',
+                            zIndex: 5,
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.15, duration: 0.6 }}
+                    >
+                        sys://portfolio.init
+                    </motion.div> */}
+
+                    {/* <motion.div
+                        style={{
+                            position: 'absolute',
+                            top: '1.8rem',
+                            right: '2.2rem',
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '0.58rem',
+                            letterSpacing: '0.18em',
+                            color: '#2A2A2A',
+                            textTransform: 'uppercase',
+                            zIndex: 5,
+                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.2, duration: 0.6 }}
+                    >
+                        v2.0.26
+                    </motion.div> */}
+
+                    {/* ── Central block ── */}
+                    <div
+                        style={{
+                            position: 'relative',
+                            zIndex: 5,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: 0,
+                            paddingLeft: 'clamp(1.5rem, 5vw, 4rem)',
+                        }}
+                    >
+                        {/* ABHISHEK — starts at 150ms, char 80ms apart, 460ms scramble */}
+                        <ScrambleWord
+                            text="ABHISHEK"
+                            startDelay={150}
+                            charDelay={80}
+                            scrambleDuration={460}
+                            fontSize="clamp(4.8rem, 15vw, 11rem)"
+                        />
+
+                        {/* MANE — starts at 850ms for a staggered "second line" feel */}
+                        <ScrambleWord
+                            text="MANE"
+                            startDelay={850}
+                            charDelay={90}
+                            scrambleDuration={460}
+                            fontSize="clamp(4.8rem, 15vw, 11rem)"
+                        />
+
+                        {/* Separator + progress */}
+                        <div
+                            style={{
+                                marginTop: '1.6rem',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '0.6rem',
+                                width: 'clamp(280px, 50vw, 520px)',
+                            }}
+                        >
+                            <SparkLine progress={progress} visible={progressVisible} />
+
+                            {/* Status row */}
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    fontFamily: "'JetBrains Mono', monospace",
+                                    fontSize: '0.6rem',
+                                    letterSpacing: '0.08em',
+                                    textTransform: 'uppercase',
+                                    opacity: progressVisible ? 1 : 0,
+                                    transition: 'opacity 0.4s ease',
+                                }}
                             >
-                                Initializing
-                            </motion.div>
-
-                            <div className="text-white">
-                                <CounterRow text="2026" delay={200} size="text-7xl md:text-9xl" />
-                            </div>
-
-                            {/* <motion.div
-                                className="text-xl md:text-2xl font-mono font-light tracking-[0.5em] text-white/30 uppercase"
-                                initial={{ opacity: 0, letterSpacing: '1em' }}
-                                animate={{ opacity: 1, letterSpacing: '0.5em' }}
-                                transition={{ delay: 0.8, duration: 0.8 }}
-                            >
-                                Abhishek
-                            </motion.div> */}
-                        </div>
-
-                        {/* Progress bar */}
-                        <div className="flex flex-col items-center gap-3 w-64">
-                            <div className="w-full h-[1px] bg-white/5 rounded-full overflow-hidden">
-                                <motion.div
-                                    className="h-full"
+                                <StatusCycler visible={progressVisible} />
+                                <span
                                     style={{
-                                        background: 'linear-gradient(90deg, #7c3aed, #06b6d4)',
+                                        color: '#383838',
+                                        fontVariantNumeric: 'tabular-nums',
                                     }}
-                                    animate={{ width: `${Math.min(progress, 100)}%` }}
-                                    transition={{ duration: 0.1 }}
-                                />
-                            </div>
-
-                            <div className="flex justify-between w-full font-mono text-[10px] text-white/20">
-                                <span>SYS.READY</span>
-                                <span className="tabular-nums text-white/40">
-                                    {Math.min(Math.round(progress), 100)}%
+                                >
+                                    {String(progress).padStart(3, '0')}
+                                    <span style={{ color: '#222' }}>%</span>
                                 </span>
                             </div>
                         </div>
+                    </div>
 
-                        {/* Blinking cursor */}
-                        <motion.div
-                            className="flex items-center gap-1 font-mono text-xs text-white/15"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ delay: 1.2 }}
-                        >
-                            <motion.span
-                                className="w-2 h-4 bg-violet-400/50"
-                                animate={{ opacity: [1, 0, 1] }}
-                                transition={{ duration: 1, repeat: Infinity }}
-                            />
-                            <span>loading modules...</span>
-                        </motion.div>
-                    </motion.div>
-
-                    {/* Bottom status */}
+                    {/* ── Bottom role strip ── */}
                     <motion.div
-                        className="absolute bottom-6 left-0 right-0 flex justify-center"
+                        style={{
+                            position: 'absolute',
+                            bottom: '1.8rem',
+                            left: 0,
+                            right: 0,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            gap: '1.5rem',
+                            fontFamily: "'JetBrains Mono', monospace",
+                            fontSize: '0.52rem',
+                            letterSpacing: '0.22em',
+                            textTransform: 'uppercase',
+                            color: '#1E1E1E',
+                            zIndex: 5,
+                        }}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ delay: 0.6 }}
+                        transition={{ delay: 1.8, duration: 0.8 }}
                     >
-                        <div className="flex items-center gap-6 font-mono text-[10px] text-white/15">
-                            <div className="flex items-center gap-1.5">
-                                <motion.span
-                                    className="w-1.5 h-1.5 rounded-full bg-emerald-400"
-                                    animate={{ opacity: [1, 0.3, 1] }}
-                                    transition={{ duration: 1.5, repeat: Infinity }}
-                                />
-                                <span>ONLINE</span>
-                            </div>
-                            <span>·</span>
-                            <span>v2.0.26</span>
-                            <span>·</span>
-                            <span>2709 MODULES</span>
-                        </div>
+                        <span>Full-Stack Dev</span>
+                        <span style={{ color: '#FFCC00', opacity: 0.4 }}>×</span>
+                        <span>UI/UX Designer</span>
+                        <span style={{ color: '#FFCC00', opacity: 0.4 }}>×</span>
+                        <span>AI Enthusiast</span>
                     </motion.div>
                 </motion.div>
             )}

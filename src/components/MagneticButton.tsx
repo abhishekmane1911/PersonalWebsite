@@ -1,3 +1,4 @@
+import React from 'react';
 import { useRef, useState } from 'react';
 import type { ReactNode, MouseEvent as ReactMouseEvent } from 'react';
 import { motion } from 'framer-motion';
@@ -5,6 +6,7 @@ import { motion } from 'framer-motion';
 interface MagneticButtonProps {
     children: ReactNode;
     className?: string;
+    style?: React.CSSProperties;
     strength?: number;
     as?: 'button' | 'a';
     href?: string;
@@ -16,6 +18,7 @@ interface MagneticButtonProps {
 const MagneticButton = ({
     children,
     className = '',
+    style,
     strength = 0.35,
     as = 'button',
     href,
@@ -64,6 +67,7 @@ const MagneticButton = ({
             >
                 <Tag
                     className={className}
+                    style={style}
                     onClick={onClick}
                     {...linkProps}
                 >

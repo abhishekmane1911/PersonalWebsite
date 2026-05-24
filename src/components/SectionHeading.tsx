@@ -2,44 +2,73 @@ import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
 
 interface SectionHeadingProps {
+    /** e.g. "01", "02" */
+    index?: string;
     title: string;
-    subtitle: string;
-    icon?: ReactNode;
+    subtitle?: string;
+    align?: 'left' | 'center';
+    /** Optional: extra class for the wrapper */
+    className?: string;
 }
 
-const SectionHeading = ({ title, subtitle, icon }: SectionHeadingProps) => {
+/**
+ * Editorial section heading — Syne display, left-aligned, numbered.
+ * No icon chip, no gradient animation, no rainbow underline.
+ * Each section can still override with its own heading if needed.
+ */
+const SectionHeading = ({
+    index,
+    title,
+    subtitle,
+    align = 'left',
+    className = '',
+}: SectionHeadingProps) => {
+    const isCenter = align === 'center';
+
     return (
         <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-100px' }}
-            transition={{ duration: 0.7 }}
-            className="text-center mb-16 md:mb-20"
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className={`mb-16 md:mb-20 ${isCenter ? 'text-center' : ''} ${className}`}
         >
-            {icon && (
-                <motion.span
-                    initial={{ scale: 0 }}
-                    whileInView={{ scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
-                    className="inline-flex items-center justify-center w-12 h-12 rounded-xl glass mb-4 text-violet-400 text-xl"
+            {/* Section number tag */}
+            {index && (
+                <div
+                    className={`font-mono text-[10px] uppercase tracking-[0.3em] mb-4 flex items-center gap-3 ${isCenter ? 'justify-center' : ''}`}
+                    style={{ color: 'var(--color-accent)' }}
                 >
-                    {icon}
-                </motion.span>
+                    <span>{index}</span>
+                    <span
+                        className="inline-block h-px flex-1 max-w-[48px]"
+                        style={{ background: 'var(--color-accent)', opacity: 0.5 }}
+                    />
+                </div>
             )}
-            <h2 className="font-heading text-3xl md:text-5xl font-bold gradient-text mb-4">
+
+            {/* Title */}
+            <h2
+                className="font-display font-bold text-white"
+                style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', letterSpacing: '-0.03em' }}
+            >
                 {title}
             </h2>
-            <p className="text-gray-400 text-base md:text-lg max-w-xl mx-auto">
-                {subtitle}
-            </p>
-            <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: 80 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: 0.3 }}
-                className="h-1 bg-gradient-to-r from-violet-500 to-cyan-400 mx-auto mt-6 rounded-full"
-            />
+
+            {/* Subtitle */}
+            {subtitle && (
+                <p
+                    className="mt-4 max-w-lg font-sans leading-relaxed"
+                    style={{
+                        color: 'var(--color-text-2)',
+                        fontSize: '1rem',
+                        marginLeft: isCenter ? 'auto' : undefined,
+                        marginRight: isCenter ? 'auto' : undefined,
+                    }}
+                >
+                    {subtitle}
+                </p>
+            )}
         </motion.div>
     );
 };

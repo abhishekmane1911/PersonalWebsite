@@ -29,12 +29,8 @@ const ParticleBackground = () => {
                         top: `${particle.y}%`,
                         width: particle.size,
                         height: particle.size,
-                        background: particle.id % 3 === 0
-                            ? 'rgba(139, 92, 246, 0.6)'
-                            : particle.id % 3 === 1
-                                ? 'rgba(34, 211, 238, 0.6)'
-                                : 'rgba(232, 121, 249, 0.6)',
-                        opacity: particle.opacity,
+                        background: 'rgba(255, 255, 255, 0.7)',
+                        opacity: particle.opacity * 0.4,
                     }}
                     animate={{
                         y: [0, -30, 0, 20, 0],

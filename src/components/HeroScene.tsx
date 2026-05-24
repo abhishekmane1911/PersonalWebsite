@@ -77,15 +77,12 @@ const ParticleField = ({ count = 300 }: { count?: number }) => {
             positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
 
             const t = Math.random();
-            if (t < 0.33) {
-                // Violet
-                colors[i * 3] = 0.49; colors[i * 3 + 1] = 0.23; colors[i * 3 + 2] = 0.93;
-            } else if (t < 0.66) {
-                // Cyan
-                colors[i * 3] = 0.02; colors[i * 3 + 1] = 0.71; colors[i * 3 + 2] = 0.83;
+            if (t < 0.6) {
+                // Warm white
+                colors[i * 3] = 0.92; colors[i * 3 + 1] = 0.90; colors[i * 3 + 2] = 0.87;
             } else {
-                // Magenta
-                colors[i * 3] = 0.93; colors[i * 3 + 1] = 0.28; colors[i * 3 + 2] = 0.61;
+                // Amber/gold
+                colors[i * 3] = 0.91; colors[i * 3 + 1] = 0.77; colors[i * 3 + 2] = 0.28;
             }
 
             sizes[i] = Math.random() * 0.04 + 0.01;
@@ -149,20 +146,23 @@ const HeroScene = () => {
     if (isMobile) return null;
 
     return (
-        <div className="absolute inset-0 z-0">
+        <div
+            className="absolute top-0 right-0 bottom-0 z-0 pointer-events-none"
+            style={{ width: '52%' }}
+        >
             <Canvas
-                camera={{ position: [0, 0, 6], fov: 55 }}
+                camera={{ position: [0, 0, 6], fov: 52 }}
                 dpr={[1, 1.5]}
                 gl={{ antialias: true, alpha: true }}
                 style={{ background: 'transparent' }}
             >
-                {/* Lighting */}
-                <ambientLight intensity={0.2} />
-                <directionalLight position={[5, 5, 5]} intensity={1} color="#a78bfa" />
-                <directionalLight position={[-3, 2, -2]} intensity={0.5} color="#22d3ee" />
-                <pointLight position={[-5, -5, -5]} intensity={0.6} color="#06b6d4" />
-                <pointLight position={[5, -3, 2]} intensity={0.4} color="#ec4899" />
-                <pointLight position={[0, 5, 0]} intensity={0.3} color="#e879f9" />
+                {/* Lighting — warm, not violet/cyan */}
+                <ambientLight intensity={0.15} />
+                <directionalLight position={[5, 5, 5]} intensity={0.8} color="#FFF8E7" />
+                <directionalLight position={[-3, 2, -2]} intensity={0.4} color="#E8C547" />
+                <pointLight position={[-5, -5, -5]} intensity={0.4} color="#FFFFFF" />
+                <pointLight position={[5, -3, 2]} intensity={0.3} color="#E8C547" />
+                <pointLight position={[0, 5, 0]} intensity={0.2} color="#FFF5CC" />
 
                 {/* Camera rig */}
                 <CameraRig />
@@ -170,15 +170,13 @@ const HeroScene = () => {
                 {/* Centre piece */}
                 <HeroTorusKnot />
 
-
-
                 {/* Particles */}
-                <ParticleField count={350} />
+                <ParticleField count={280} />
 
-                {/* Orbit rings at different tilts */}
-                <OrbitRing radius={2.8} speed={0.2} color="#7c3aed" tilt={[0.3, 0, 0]} />
-                <OrbitRing radius={3.5} speed={-0.15} color="#06b6d4" tilt={[-0.2, 0.5, 0]} />
-                <OrbitRing radius={4.2} speed={0.1} color="#ec4899" tilt={[0.1, -0.3, 0.2]} />
+                {/* Orbit rings — desaturated, subtle */}
+                <OrbitRing radius={2.8} speed={0.2}  color="#E8C547" tilt={[0.3, 0, 0]} />
+                <OrbitRing radius={3.5} speed={-0.15} color="#FFFFFF" tilt={[-0.2, 0.5, 0]} />
+                <OrbitRing radius={4.2} speed={0.1}  color="#888888" tilt={[0.1, -0.3, 0.2]} />
             </Canvas>
         </div>
     );

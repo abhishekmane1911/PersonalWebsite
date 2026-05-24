@@ -1,168 +1,190 @@
 import { motion } from 'framer-motion';
-import { FiUser, FiCode, FiCoffee, FiAward, FiGithub } from 'react-icons/fi';
 import { GitHubCalendar } from 'react-github-calendar';
 import SectionHeading from './SectionHeading';
-import profilePic from '../../public/pic.jpg';
+import profilePic from '../assets/pic.jpg';
 
 const stats = [
-    { icon: <FiCode />, value: '28+', label: 'Projects' },
-    { icon: <FiCoffee />, value: '4+', label: 'Years Coding' },
-    { icon: <FiAward />, value: '10+', label: 'Technologies' },
-    { icon: <FiUser />, value: '100%', label: 'Dedication' },
+    { value: '28+', label: 'Projects Delivered' },
+    { value: '4+', label: 'Years Writing Code' },
+    { value: '16+', label: 'Technologies Mastered' },
+    { value: '100%', label: 'Dedication to Craft' },
 ];
 
 const About = () => {
     return (
         <section id="about" className="section-padding relative overflow-hidden">
-            {/* Background decoration */}
-            <div className="absolute top-0 right-0 w-72 h-72 bg-violet-600/5 rounded-full blur-[100px]" />
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-cyan-500/5 rounded-full blur-[100px]" />
-
             <div className="max-w-7xl mx-auto relative z-10">
                 <SectionHeading
+                    index="01"
                     title="About Me"
-                    subtitle="Get to know the person behind the code"
-                    icon={<FiUser />}
+                    subtitle="The person behind the code"
                 />
 
-                <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
-                    {/* Left: Avatar/Visual */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: '-100px' }}
-                        transition={{ duration: 0.8 }}
-                        className="relative flex justify-center"
-                    >
-                        <div className="relative">
-                            {/* Glowing border */}
-                            <div className="w-56 h-56 sm:w-72 sm:h-72 md:w-80 md:h-80 rounded-2xl gradient-border glass overflow-hidden">
-                                <div className="w-full h-full bg-gradient-to-br from-violet-600/20 via-dark-800 to-cyan-500/20 flex items-center justify-center">
-                                    <div className="text-center">
-                                        {/* <span className="text-7xl md:text-8xl font-heading font-bold gradient-text">AM</span> */}
-                                        <img src={profilePic} alt="Profile" />
-                                        <p className="text-gray-500 text-sm mt-2 font-mono">{'< developer />'}</p>
-                                    </div>
-                                </div>
-                            </div>
+                <div className="grid md:grid-cols-2 gap-14 lg:gap-24 items-start">
 
-                            {/* Floating badges — hidden on small screens to prevent overflow */}
-                            <motion.div
-                                animate={{ y: [0, -10, 0] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                                className="hidden md:block absolute -top-4 -right-4 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-violet-400"
-                            >
-                                React.tsx
-                            </motion.div>
-                            <motion.div
-                                animate={{ y: [0, 10, 0] }}
-                                transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-                                className="hidden md:block absolute -bottom-4 -left-4 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-cyan-400"
-                            >
-                                Python.py
-                            </motion.div>
-                            <motion.div
-                                animate={{ y: [0, -8, 0] }}
-                                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-                                className="hidden md:block absolute top-1/2 -right-8 px-3 py-1.5 rounded-lg glass-strong text-xs font-mono text-magenta-400"
-                            >
-                                AI/ML
-                            </motion.div>
+                    {/* ── Left: Photo ── */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -40 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: '-80px' }}
+                        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                        className="relative"
+                    >
+                        {/* Photo with diagonal clip */}
+                        <div
+                            className="relative overflow-hidden"
+                            style={{
+                                clipPath: 'polygon(0 0, 100% 0, 100% 88%, 90% 100%, 0 100%)',
+                                borderRadius: '4px',
+                            }}
+                        >
+                            <img
+                                src={profilePic}
+                                alt="Abhishek Mane"
+                                className="w-full object-cover"
+                                style={{ aspectRatio: '4/5', objectPosition: 'top' }}
+                            />
+                            {/* Subtle amber overlay on hover */}
+                            <div
+                                className="absolute inset-0 transition-opacity duration-700"
+                                style={{
+                                    background: 'linear-gradient(to bottom, transparent 60%, rgba(232,197,71,0.08) 100%)',
+                                }}
+                            />
+                        </div>
+
+                        {/* Floating accent number */}
+                        <div
+                            className="absolute -right-4 -bottom-4 font-display font-bold select-none pointer-events-none"
+                            style={{
+                                fontSize: '8rem',
+                                lineHeight: 1,
+                                color: 'var(--color-accent)',
+                                opacity: 0.06,
+                                letterSpacing: '-0.05em',
+                            }}
+                        >
+                            AM
                         </div>
                     </motion.div>
 
-                    {/* Right: Bio */}
+                    {/* ── Right: Bio + Stats ── */}
                     <motion.div
-                        initial={{ opacity: 0, x: 50 }}
+                        initial={{ opacity: 0, x: 40 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: '-100px' }}
-                        transition={{ duration: 0.8, delay: 0.2 }}
+                        viewport={{ once: true, margin: '-80px' }}
+                        transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
                     >
-                        <h3 className="font-heading text-2xl md:text-3xl font-bold text-white mb-6">
-                            Turning ideas into{' '}
-                            <span className="gradient-text-static">reality</span>
-                        </h3>
+                        {/* Pull quote */}
+                        <p
+                            className="font-display font-bold mb-8 leading-tight"
+                            style={{
+                                fontSize: 'clamp(1.6rem, 3.5vw, 2.4rem)',
+                                letterSpacing: '-0.03em',
+                                color: '#FFFFFF',
+                            }}
+                        >
+                            "I build things that{' '}
+                            <span style={{ color: 'var(--color-accent)', fontStyle: 'italic' }}>
+                                work beautifully.
+                            </span>"
+                        </p>
 
-                        <div className="space-y-4 text-gray-400 leading-relaxed">
+                        {/* Bio */}
+                        <div
+                            className="font-sans space-y-4 mb-10"
+                            style={{ color: 'var(--color-text-2)', lineHeight: 1.75 }}
+                        >
                             <p>
-                                I'm a passionate <span className="text-white font-medium">Full-Stack Developer</span> and{' '}
-                                <span className="text-white font-medium">Designer</span> with a deep love for building
-                                innovative digital solutions. My journey spans across web development, AI/ML,
-                                and creative design.
+                                I'm a <strong className="text-white font-medium">Full-Stack Developer</strong> and{' '}
+                                <strong className="text-white font-medium">Designer</strong> — I write the backend,
+                                design the interface, and ship the product. My work spans social platforms,
+                                AI systems, DeFi apps, and healthcare tooling.
                             </p>
                             <p>
-                                From complete end to end Club management platform like <span className="text-violet-400">CSESA Website</span> to
-                                AI-powered systems like <span className="text-cyan-400">DR Classification</span>,
-                                I build projects that push boundaries and solve real-world problems.
+                                From leading the <span className="text-white">CSESA platform</span> at IIT Indore
+                                to building multi-agent AI courtroom simulations, I care about code that's
+                                clean, performant, and intentional.
                             </p>
                             <p>
-                                My tech arsenal includes <span className="text-white">React, TypeScript, Python, Django, Node.js, Framer Motion</span>,
-                                and various AI/ML frameworks. I believe in writing clean, performant code and
-                                creating designs that tell stories.
+                                My stack:{' '}
+                                <span className="text-white">
+                                    React, TypeScript, Python, Django, Node.js, Three.js, LangChain
+                                </span>
+                                {' '}— and whatever the project actually needs.
                             </p>
                         </div>
 
-                        {/* Stats Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8">
+                        {/* ── Stats — editorial ruled list ── */}
+                        <div className="space-y-0">
                             {stats.map((stat, i) => (
                                 <motion.div
                                     key={stat.label}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0, x: 20 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true }}
-                                    transition={{ delay: 0.4 + i * 0.1 }}
-                                    className="text-center p-4 rounded-xl glass hover:bg-white/5 transition-all duration-300 group"
+                                    transition={{ delay: 0.3 + i * 0.08, duration: 0.6 }}
+                                    className="flex items-center justify-between py-4 group"
+                                    style={{ borderBottom: '1px solid var(--color-border)' }}
                                 >
-                                    <span className="text-violet-400 text-lg mb-2 block group-hover:text-cyan-400 transition-colors">
-                                        {stat.icon}
-                                    </span>
-                                    <span className="block text-2xl font-bold text-white font-heading">
+                                    <span
+                                        className="font-display font-bold text-white transition-colors duration-200 group-hover:text-amber-400"
+                                        style={{ fontSize: '1.6rem', letterSpacing: '-0.02em' }}
+                                    >
                                         {stat.value}
                                     </span>
-                                    <span className="text-xs text-gray-500 font-mono">
+                                    <span
+                                        className="font-mono text-[11px] uppercase tracking-[0.18em]"
+                                        style={{ color: 'var(--color-text-2)' }}
+                                    >
                                         {stat.label}
                                     </span>
+                                    {/* Expanding rule on hover */}
+                                    <div
+                                        className="h-px transition-all duration-500 mx-4 flex-1"
+                                        style={{
+                                            background: 'var(--color-border)',
+                                            maxWidth: '80px',
+                                        }}
+                                    />
                                 </motion.div>
                             ))}
                         </div>
                     </motion.div>
                 </div>
 
-                {/* GitHub Contribution Calendar */}
+                {/* ── GitHub Calendar ── */}
                 <motion.div
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.8, delay: 0.6 }}
-                    className="mt-16 p-6 md:p-8 overflow-hidden"
+                    transition={{ duration: 0.8, delay: 0.4 }}
+                    className="mt-20"
                 >
-                    {/* <div className="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
-                        <div>
-                            <h4 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
-                                <FiGithub className="text-violet-400" />
-                                GitHub Activity
-                            </h4>
-                        </div>
+                    <div className="flex items-center gap-4 mb-6">
+                        <span
+                            className="font-mono text-[10px] uppercase tracking-[0.3em]"
+                            style={{ color: 'var(--color-accent)' }}
+                        >
+                            GitHub Activity
+                        </span>
+                        <div className="h-px flex-1" style={{ background: 'var(--color-border)' }} />
+                    </div>
+                    <div className="flex justify-start overflow-x-auto py-2">
                         <a
                             href="https://github.com/abhishekmane1911"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-4 py-2 rounded-xl glass hover:bg-white/5 text-sm font-medium text-gray-300 transition-all flex items-center gap-2"
                         >
-                            View Profile
-                        </a>
-                    </div> */}
-                    <div className="flex justify-center overflow-x-auto py-2 custom-scrollbar -mx-4 px-4">
-                        <a href="https://github.com/abhishekmane1911" target="_blank" rel="noopener noreferrer">
                             <GitHubCalendar
                                 username="abhishekmane1911"
                                 theme={{
-                                    light: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
-                                    dark: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
+                                    light: ['#161616', '#2A1F00', '#5C4500', '#A07800', '#E8C547'],
+                                    dark: ['#161616', '#2A1F00', '#5C4500', '#A07800', '#E8C547'],
                                 }}
-                                blockSize={12}
+                                blockSize={11}
                                 blockMargin={4}
-                                fontSize={12}
+                                fontSize={11}
                             />
                         </a>
                     </div>

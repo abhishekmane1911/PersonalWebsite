@@ -1,180 +1,317 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { FiMail, FiSend, FiMapPin, FiGithub, FiLinkedin, FiInstagram } from 'react-icons/fi';
+import { FiArrowUpRight, FiGithub, FiLinkedin, FiInstagram } from 'react-icons/fi';
+import emailjs from '@emailjs/browser';
 import SectionHeading from './SectionHeading';
 
+/* ── Underline input / textarea ── */
+const LineInput = ({
+    label,
+    id,
+    type = 'text',
+    value,
+    onChange,
+    placeholder,
+    required,
+    rows,
+}: {
+    label: string;
+    id: string;
+    type?: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    placeholder?: string;
+    required?: boolean;
+    rows?: number;
+}) => {
+    const [focused, setFocused] = useState(false);
+    const commonStyle: React.CSSProperties = {
+        background: 'transparent',
+        border: 'none',
+        borderBottom: `1px solid ${focused ? 'var(--color-accent)' : 'rgba(255,255,255,0.12)'}`,
+        color: 'var(--color-text)',
+        outline: 'none',
+        width: '100%',
+        padding: '12px 0',
+        fontFamily: 'var(--font-body)',
+        fontSize: '0.95rem',
+        transition: 'border-color 0.25s ease',
+        resize: 'none' as const,
+    };
+
+    return (
+        <div className="relative group">
+            <label
+                htmlFor={id}
+                className="block font-mono text-[10px] uppercase tracking-[0.25em] mb-3 transition-colors duration-200"
+                style={{ color: focused ? 'var(--color-accent)' : 'var(--color-text-2)' }}
+            >
+                {label}
+            </label>
+            {rows ? (
+                <textarea
+                    id={id}
+                    required={required}
+                    rows={rows}
+                    value={value}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    style={{ ...commonStyle, display: 'block' }}
+                />
+            ) : (
+                <input
+                    id={id}
+                    type={type}
+                    required={required}
+                    value={value}
+                    onChange={onChange}
+                    placeholder={placeholder}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    style={commonStyle}
+                />
+            )}
+            {/* Focus line accent */}
+            <motion.div
+                className="absolute bottom-0 left-0 h-px"
+                style={{ background: 'var(--color-accent)' }}
+                animate={{ width: focused ? '100%' : '0%' }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            />
+        </div>
+    );
+};
+
+/* ── Contact Section ── */
 const Contact = () => {
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
+    const form = useRef<HTMLFormElement>(null);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        // Simulate submission (replace with EmailJS or similar)
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        setIsSubmitting(false);
-        setIsSubmitted(true);
-        setFormData({ name: '', email: '', message: '' });
-
-        setTimeout(() => setIsSubmitted(false), 5000);
+        try {
+            if (!form.current) return;
+            
+            await emailjs.sendForm(
+                import.meta.env.VITE_EMAILJS_SERVICE_ID || '', 
+                import.meta.env.VITE_EMAILJS_TEMPLATE_ID || '', 
+                form.current, 
+                import.meta.env.VITE_EMAILJS_PUBLIC_KEY || ''
+            );
+            
+            setIsSubmitted(true);
+            setFormData({ name: '', email: '', message: '' });
+            setTimeout(() => setIsSubmitted(false), 5000);
+        } catch (error) {
+            console.error('FAILED...', error);
+            alert('Failed to send message. Please try emailing directly.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const contactInfo = [
-        { icon: <FiMail />, label: 'Email', value: 'abhishekmane1911@gmail.com', href: 'mailto:abhishekmane1911@gmail.com' },
-        { icon: <FiMapPin />, label: 'Location', value: 'Indore, India', href: '#' },
-    ];
-
-    const socialLinks = [
-        { icon: <FiGithub />, href: 'https://github.com/abhishekmane1911', label: 'GitHub' },
-        { icon: <FiLinkedin />, href: 'https://www.linkedin.com/in/abhishekmane19/', label: 'LinkedIn' },
-        { icon: <FiInstagram />, href: 'https://www.instagram.com/abhishek_mane_1911/', label: 'Instagram' },
+    const socials = [
+        { icon: <FiGithub />,    href: 'https://github.com/abhishekmane1911',             label: 'GitHub' },
+        { icon: <FiLinkedin />,  href: 'https://www.linkedin.com/in/abhishekmane19/',     label: 'LinkedIn' },
+        { icon: <FiInstagram />, href: 'https://www.instagram.com/abhishek_mane_1911/',   label: 'Instagram' },
     ];
 
     return (
         <section id="contact" className="section-padding relative overflow-hidden">
-            <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-violet-600/5 rounded-full blur-[120px]" />
-            <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-cyan-500/5 rounded-full blur-[100px]" />
-
-            <div className="max-w-6xl mx-auto relative z-10">
+            <div className="max-w-7xl mx-auto relative z-10">
                 <SectionHeading
+                    index="05"
                     title="Get In Touch"
-                    subtitle="Have a project in mind? Let's build something amazing together."
-                    icon={<FiMail />}
+                    subtitle="Open to new projects, collaborations, or just a conversation"
                 />
 
-                <div className="grid md:grid-cols-2 gap-8 md:gap-12">
-                    {/* Contact Info */}
-                    <motion.div
-                        initial={{ opacity: 0, x: -40 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: '-50px' }}
-                        transition={{ duration: 0.7 }}
+                {/* ── Large email CTA ── */}
+                <motion.div
+                    className="mb-20"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                >
+                    <p
+                        className="font-mono text-[11px] uppercase tracking-[0.3em] mb-4"
+                        style={{ color: 'var(--color-text-2)' }}
                     >
-                        <h3 className="font-heading text-2xl font-bold text-white mb-6">
-                            Let's create something{' '}
-                            <span className="gradient-text-static">extraordinary</span>
-                        </h3>
-
-                        <p className="text-gray-400 leading-relaxed mb-8">
-                            I'm always open to discussing new projects, creative ideas, or
-                            opportunities to be part of your vision. Whether it's a web app,
-                            AI project, or just a chat about tech — reach out!
-                        </p>
-
-                        {/* Contact Details */}
-                        <div className="space-y-4 mb-8">
-                            {contactInfo.map((info) => (
-                                <motion.a
-                                    key={info.label}
-                                    href={info.href}
-                                    className="flex items-center gap-4 p-4 rounded-xl glass hover:bg-white/[0.04] transition-all duration-300 group"
-                                    whileHover={{ x: 5 }}
-                                >
-                                    <span className="w-10 h-10 rounded-lg bg-gradient-to-r from-violet-500/20 to-cyan-500/20 flex items-center justify-center text-violet-400 group-hover:text-cyan-400 transition-colors">
-                                        {info.icon}
-                                    </span>
-                                    <div>
-                                        <span className="text-xs text-gray-500 font-mono">{info.label}</span>
-                                        <p className="text-sm text-gray-300">{info.value}</p>
-                                    </div>
-                                </motion.a>
-                            ))}
-                        </div>
-
-                        {/* Social Links */}
-                        <div className="flex items-center gap-3">
-                            <span className="text-xs text-gray-500 font-mono mr-2">Find me on</span>
-                            {socialLinks.map((social) => (
-                                <motion.a
-                                    key={social.label}
-                                    href={social.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-3 rounded-lg glass text-gray-400 hover:text-white hover:bg-white/10 transition-all duration-300"
-                                    whileHover={{ scale: 1.1, y: -2 }}
-                                    whileTap={{ scale: 0.9 }}
-                                    aria-label={social.label}
-                                >
-                                    {social.icon}
-                                </motion.a>
-                            ))}
-                        </div>
-                    </motion.div>
-
-                    {/* Contact Form */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 40 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, margin: '-50px' }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
+                        Reach me directly
+                    </p>
+                    <motion.a
+                        href="mailto:abhishekmane1911@gmail.com"
+                        className="inline-flex items-end gap-3 group"
+                        whileHover={{ x: 6 }}
+                        transition={{ duration: 0.2 }}
                     >
-                        <form onSubmit={handleSubmit} className="space-y-5">
-                            <div>
-                                <label htmlFor="name" className="block text-sm text-gray-400 mb-2 font-mono">
-                                    Name
-                                </label>
-                                <input
-                                    id="name"
-                                    type="text"
-                                    required
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl glass bg-transparent text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/25 transition-all text-sm"
-                                    placeholder="John Doe"
-                                />
-                            </div>
+                        <span
+                            className="font-display font-bold leading-none"
+                            style={{
+                                fontSize: 'clamp(1.6rem, 4.5vw, 3.2rem)',
+                                letterSpacing: '-0.03em',
+                                color: '#FFFFFF',
+                                transition: 'color 0.2s',
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--color-accent)')}
+                            onMouseLeave={(e) => (e.currentTarget.style.color = '#FFFFFF')}
+                        >
+                            abhishekmane1911@gmail.com
+                        </span>
+                        <FiArrowUpRight
+                            className="mb-1 shrink-0 transition-all duration-200 group-hover:translate-x-1 group-hover:-translate-y-1"
+                            style={{ fontSize: '1.8rem', color: 'var(--color-accent)' }}
+                        />
+                    </motion.a>
+                </motion.div>
 
-                            <div>
-                                <label htmlFor="email" className="block text-sm text-gray-400 mb-2 font-mono">
-                                    Email
-                                </label>
-                                <input
-                                    id="email"
-                                    type="email"
-                                    required
-                                    value={formData.email}
-                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl glass bg-transparent text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/25 transition-all text-sm"
-                                    placeholder="john@example.com"
-                                />
-                            </div>
+                {/* ── Grid: form + info ── */}
+                <div className="grid md:grid-cols-2 gap-14 lg:gap-20">
 
-                            <div>
-                                <label htmlFor="message" className="block text-sm text-gray-400 mb-2 font-mono">
-                                    Message
-                                </label>
-                                <textarea
-                                    id="message"
-                                    required
-                                    rows={5}
-                                    value={formData.message}
-                                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full px-4 py-3 rounded-xl glass bg-transparent text-white placeholder-gray-600 focus:outline-none focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/25 transition-all text-sm resize-none"
-                                    placeholder="Tell me about your project..."
-                                />
-                            </div>
+                    {/* Form */}
+                    <motion.div
+                        initial={{ opacity: 0, x: -30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: '-60px' }}
+                        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                    >
+                        <form ref={form} onSubmit={handleSubmit} className="space-y-8">
+                            <LineInput
+                                label="Your Name"
+                                id="name"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                placeholder="John Doe"
+                                required
+                            />
+                            {/* Hidden input to map to EmailJS template variable if you use from_name */}
+                            <input type="hidden" name="from_name" value={formData.name} />
+
+                            <LineInput
+                                label="Email Address"
+                                id="email"
+                                type="email"
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                placeholder="john@example.com"
+                                required
+                            />
+                            {/* Hidden input to map to EmailJS template variable if you use reply_to */}
+                            <input type="hidden" name="reply_to" value={formData.email} />
+
+                            <LineInput
+                                label="Message"
+                                id="message"
+                                value={formData.message}
+                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                placeholder="Tell me about your project..."
+                                required
+                                rows={4}
+                            />
+                            <input type="hidden" name="message" value={formData.message} />
 
                             <motion.button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-white font-medium text-sm flex items-center justify-center gap-2 hover:from-violet-500 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 shadow-lg shadow-violet-500/20"
-                                whileHover={{ scale: 1.02, boxShadow: '0 0 40px rgba(139, 92, 246, 0.3)' }}
-                                whileTap={{ scale: 0.98 }}
+                                className="inline-flex items-center gap-3 font-sans font-medium text-sm transition-all duration-200 disabled:opacity-40"
+                                style={{ color: isSubmitted ? '#4ADE80' : 'var(--color-accent)' }}
+                                whileHover={{ x: 4 }}
+                                whileTap={{ scale: 0.97 }}
                             >
                                 {isSubmitting ? (
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    <>
+                                        <span
+                                            className="w-4 h-4 rounded-full border-2 animate-spin"
+                                            style={{ borderColor: 'var(--color-accent)', borderTopColor: 'transparent' }}
+                                        />
+                                        Sending...
+                                    </>
                                 ) : isSubmitted ? (
-                                    'Message Sent! ✨'
+                                    'Message sent ✓'
                                 ) : (
                                     <>
-                                        <FiSend /> Send Message
+                                        Send Message
+                                        <FiArrowUpRight />
                                     </>
                                 )}
                             </motion.button>
                         </form>
+                    </motion.div>
+
+                    {/* Info side */}
+                    <motion.div
+                        initial={{ opacity: 0, x: 30 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, margin: '-60px' }}
+                        transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+                        className="space-y-10"
+                    >
+                        {/* Location */}
+                        <div>
+                            <p
+                                className="font-mono text-[10px] uppercase tracking-[0.25em] mb-2"
+                                style={{ color: 'var(--color-text-2)' }}
+                            >
+                                Based in
+                            </p>
+                            <p className="font-display font-bold text-white text-2xl" style={{ letterSpacing: '-0.02em' }}>
+                                Indore, India
+                            </p>
+                        </div>
+
+                        {/* Availability */}
+                        <div>
+                            <p
+                                className="font-mono text-[10px] uppercase tracking-[0.25em] mb-2"
+                                style={{ color: 'var(--color-text-2)' }}
+                            >
+                                Status
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <span
+                                    className="w-2 h-2 rounded-full"
+                                    style={{ background: '#4ADE80', boxShadow: '0 0 8px rgba(74,222,128,0.7)' }}
+                                />
+                                <span className="font-sans text-white">Open to opportunities</span>
+                            </div>
+                        </div>
+
+                        {/* Social links */}
+                        <div>
+                            <p
+                                className="font-mono text-[10px] uppercase tracking-[0.25em] mb-4"
+                                style={{ color: 'var(--color-text-2)' }}
+                            >
+                                Elsewhere
+                            </p>
+                            <div className="space-y-3">
+                                {socials.map((s) => (
+                                    <motion.a
+                                        key={s.label}
+                                        href={s.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-3 group transition-colors duration-200"
+                                        style={{ color: 'var(--color-text-2)' }}
+                                        whileHover={{ x: 4, color: '#FFFFFF' } as any}
+                                    >
+                                        <span className="text-base">{s.icon}</span>
+                                        <span className="font-sans text-sm">{s.label}</span>
+                                        <FiArrowUpRight
+                                            className="text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                            style={{ color: 'var(--color-accent)' }}
+                                        />
+                                    </motion.a>
+                                ))}
+                            </div>
+                        </div>
                     </motion.div>
                 </div>
             </div>

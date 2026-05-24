@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FiBriefcase, FiCalendar, FiMapPin, FiZap, FiArrowRight } from 'react-icons/fi';
+import { useState, useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import SectionHeading from './SectionHeading';
 
 const experiences = [
@@ -9,218 +8,222 @@ const experiences = [
         company: 'Freelance & Personal Projects',
         period: '2022 — Present',
         location: 'India',
-        description: 'Building complete web applications from concept to deployment. Developed Linkup (social platform), CSESA Website, and multiple full-stack projects using React, TypeScript, Python, and cloud services.',
+        description: 'Designed and shipped 28+ production projects end-to-end — architecture, backend, frontend, deployment. Clients and personal projects spanning social platforms, DeFi, healthcare, and AI tools.',
         tech: ['React', 'TypeScript', 'Python', 'Firebase', 'Vercel'],
-        highlights: ['10+ Projects Delivered', 'Full-Stack Expertise', 'Production Deployments'],
-        gradient: 'from-violet-500 via-purple-500 to-indigo-500',
-        color: '#8b5cf6',
-        glow: 'rgba(139, 92, 246, 0.15)',
-    },
-    {
-        title: 'AI/ML Developer',
-        company: 'Research & Innovation Projects',
-        period: '2024 — Present',
-        location: 'India',
-        description: 'Developing AI-powered applications including courtroom simulation systems and intelligent automation tools. Working with NLP, computer vision, and agentic AI frameworks.',
-        tech: ['Python', 'LangChain', 'AI/ML', 'NLP', 'OpenCV'],
-        highlights: ['AI Courtroom System', 'NLP Applications', 'Computer Vision'],
-        gradient: 'from-cyan-500 via-blue-500 to-teal-500',
-        color: '#06b6d4',
-        glow: 'rgba(6, 182, 212, 0.15)',
+        highlights: ['28+ Projects Shipped', 'Full-Stack Ownership', 'Production Deployments'],
+        color: '#E8C547',
     },
     {
         title: 'Web Development Lead',
-        company: 'CSESA — Student Association',
+        company: 'CSESA — IIT Indore Student Association',
         period: '2024 — 2025',
+        location: 'Indore, India',
+        description: 'Led a team of 5 engineers to build and ship the official CS student association platform in 3 months — zero scope creep, zero deadline slips. Stack ownership, code review, and stakeholder coordination.',
+        tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Vercel'],
+        highlights: ['Team of 5', 'Shipped in 3 Months', 'Stakeholder Management'],
+        color: '#60A5FA',
+    },
+    {
+        title: 'AI / ML Developer',
+        company: 'Research & Innovation Projects',
+        period: '2024 — Present',
         location: 'India',
-        description: 'Led the development of the official student association website. Managed the tech stack, coordinated with team members, and ensured timely delivery of a feature-rich platform.',
-        tech: ['Next.js', 'TypeScript', 'Tailwind CSS', 'Team Lead'],
-        highlights: ['Team Leadership', 'End-to-End Delivery', 'Stakeholder Management'],
-        gradient: 'from-emerald-500 via-green-500 to-teal-500',
-        color: '#10b981',
-        glow: 'rgba(16, 185, 129, 0.15)',
+        description: 'Building AI-native applications — a multi-agent courtroom simulation, NLP pipelines, and computer vision tooling. Working at the intersection of LLMs, agentic frameworks, and real-world problem domains.',
+        tech: ['Python', 'LangChain', 'OpenCV', 'NLP', 'LLMs'],
+        highlights: ['AI Courtroom System', 'NLP Pipelines', 'Computer Vision'],
+        color: '#A78BFA',
     },
 ];
 
-const ExperienceCard = ({ exp, index, isActive, onClick }: {
+/* ── Vertical timeline with scroll-driven line ── */
+const TimelineLine = ({ containerRef }: { containerRef: React.RefObject<HTMLDivElement | null> }) => {
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ['start 80%', 'end 30%'],
+    });
+    const scaleY = useTransform(scrollYProgress, [0, 1], [0, 1]);
+
+    return (
+        <div className="absolute left-0 top-0 bottom-0 w-px" style={{ background: 'var(--color-border)' }}>
+            <motion.div
+                className="absolute top-0 left-0 right-0 origin-top"
+                style={{
+                    scaleY,
+                    background: 'linear-gradient(to bottom, var(--color-accent), transparent)',
+                    height: '100%',
+                }}
+            />
+        </div>
+    );
+};
+
+/* ── Single experience entry ── */
+const ExperienceEntry = ({
+    exp,
+    index,
+    isActive,
+    onClick,
+}: {
     exp: typeof experiences[0];
     index: number;
     isActive: boolean;
     onClick: () => void;
-}) => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-30px' }}
-            transition={{ duration: 0.6, delay: index * 0.1 }}
-            onClick={onClick}
-            className={`cursor-pointer group ${index === 0 ? 'md:col-span-2' : ''}`}
+}) => (
+    <motion.div
+        initial={{ opacity: 0, x: -24 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, margin: '-60px' }}
+        transition={{ duration: 0.65, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+        className="relative pl-10 pb-12 cursor-pointer group"
+        onClick={onClick}
+    >
+        {/* Timeline node */}
+        <div
+            className="absolute left-0 top-1 w-2.5 h-2.5 rounded-full -translate-x-[5px] transition-all duration-300"
+            style={{
+                background: isActive ? exp.color : '#2A2A2A',
+                boxShadow: isActive ? `0 0 12px ${exp.color}60` : 'none',
+                border: `2px solid ${isActive ? exp.color : '#3A3A3A'}`,
+            }}
+        />
+
+        {/* Horizontal connector */}
+        <div
+            className="absolute left-2.5 top-[9px] h-px w-6 transition-all duration-300"
+            style={{ background: isActive ? exp.color : 'var(--color-border)' }}
+        />
+
+        {/* Card */}
+        <div
+            className="rounded-2xl p-6 md:p-8 transition-all duration-400"
+            style={{
+                background: isActive ? `${exp.color}08` : 'var(--color-surface)',
+                border: `1px solid ${isActive ? exp.color + '30' : 'rgba(255,255,255,0.05)'}`,
+            }}
         >
-            <motion.div
-                className="relative h-full rounded-2xl overflow-hidden border transition-all duration-500"
-                style={{
-                    borderColor: isActive ? `${exp.color}44` : 'rgba(255,255,255,0.06)',
-                    background: isActive
-                        ? `linear-gradient(135deg, ${exp.glow}, rgba(255,255,255,0.02))`
-                        : 'rgba(255, 255, 255, 0.02)',
-                }}
-                whileHover={{
-                    borderColor: `${exp.color}66`,
-                    boxShadow: `0 20px 40px ${exp.glow}`,
-                }}
-                layout
-            >
-                {/* Top accent bar */}
-                <div className={`h-1 w-full bg-gradient-to-r ${exp.gradient}`} />
-
-                <div className="p-6 md:p-8">
-                    {/* Header */}
-                    <div className="flex items-start justify-between mb-4">
-                        <div>
-                            <div className="flex items-center gap-2 mb-2 flex-wrap">
-                                <span className="px-2.5 py-1 text-[11px] font-mono rounded-lg bg-white/5 border border-white/10 text-gray-400 flex items-center gap-1.5">
-                                    <FiCalendar className="text-[10px]" />
-                                    {exp.period}
-                                </span>
-                                <span className="px-2.5 py-1 text-[11px] font-mono rounded-lg bg-white/5 border border-white/10 text-gray-400 flex items-center gap-1.5">
-                                    <FiMapPin className="text-[10px]" />
-                                    {exp.location}
-                                </span>
-                            </div>
-                            <h3 className="font-heading text-xl font-bold text-white mb-1 group-hover:gradient-text transition-all">
-                                {exp.title}
-                            </h3>
-                            <p className="text-sm font-medium" style={{ color: exp.color }}>
-                                {exp.company}
-                            </p>
-                        </div>
-                        <motion.div
-                            className="p-2 rounded-xl bg-white/5 border border-white/10"
-                            whileHover={{ rotate: 90 }}
-                            style={{ color: exp.color }}
+            {/* Header row */}
+            <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+                <div>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                        <span
+                            className="font-mono text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded"
+                            style={{
+                                color: 'var(--color-text-2)',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid var(--color-border)',
+                            }}
                         >
-                            <FiArrowRight className="text-lg" />
-                        </motion.div>
+                            {exp.period}
+                        </span>
+                        <span
+                            className="font-mono text-[10px] uppercase tracking-[0.2em] px-2.5 py-1 rounded"
+                            style={{
+                                color: 'var(--color-text-2)',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid var(--color-border)',
+                            }}
+                        >
+                            {exp.location}
+                        </span>
                     </div>
-
-                    {/* Description */}
-                    <AnimatePresence>
-                        {isActive && (
-                            <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: 'auto' }}
-                                exit={{ opacity: 0, height: 0 }}
-                                transition={{ duration: 0.3 }}
-                            >
-                                <p className="text-gray-400 text-sm leading-relaxed mb-5">
-                                    {exp.description}
-                                </p>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Highlights */}
-                    <div className="flex flex-wrap gap-2 mb-5">
-                        {exp.highlights.map((h, hi) => (
-                            <motion.span
-                                key={h}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                whileInView={{ opacity: 1, scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 + hi * 0.05 }}
-                                className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium rounded-lg border"
-                                style={{
-                                    color: exp.color,
-                                    backgroundColor: `${exp.color}10`,
-                                    borderColor: `${exp.color}25`,
-                                }}
-                            >
-                                <FiZap className="text-[9px]" />
-                                {h}
-                            </motion.span>
-                        ))}
-                    </div>
-
-                    {/* Tech Tags */}
-                    <div className="flex flex-wrap gap-1.5">
-                        {exp.tech.map((t) => (
-                            <span
-                                key={t}
-                                className="px-2 py-0.5 text-[10px] font-mono text-gray-500 bg-white/[0.03] rounded border border-white/5"
-                            >
-                                {t}
-                            </span>
-                        ))}
-                    </div>
+                    <h3
+                        className="font-display font-bold text-white mb-1 group-hover:text-amber-400 transition-colors duration-200"
+                        style={{ fontSize: '1.25rem', letterSpacing: '-0.02em' }}
+                    >
+                        {exp.title}
+                    </h3>
+                    <p className="font-mono text-sm" style={{ color: exp.color }}>
+                        {exp.company}
+                    </p>
                 </div>
-            </motion.div>
-        </motion.div>
-    );
-};
 
+                {/* Toggle indicator */}
+                <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center font-mono text-sm transition-all duration-300 shrink-0"
+                    style={{
+                        border: `1px solid ${isActive ? exp.color + '40' : 'var(--color-border)'}`,
+                        color: isActive ? exp.color : 'var(--color-text-2)',
+                        background: isActive ? `${exp.color}10` : 'transparent',
+                    }}
+                >
+                    {isActive ? '−' : '+'}
+                </div>
+            </div>
+
+            {/* Expandable description */}
+            <motion.div
+                initial={false}
+                animate={{ height: isActive ? 'auto' : 0, opacity: isActive ? 1 : 0 }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                style={{ overflow: 'hidden' }}
+            >
+                <p className="font-sans text-sm leading-relaxed mb-5" style={{ color: 'var(--color-text-2)' }}>
+                    {exp.description}
+                </p>
+            </motion.div>
+
+            {/* Highlights */}
+            <div className="flex flex-wrap gap-2 mb-4">
+                {exp.highlights.map((h) => (
+                    <span
+                        key={h}
+                        className="font-mono text-[11px] px-2.5 py-1 rounded-lg"
+                        style={{
+                            color: exp.color,
+                            background: `${exp.color}10`,
+                            border: `1px solid ${exp.color}25`,
+                        }}
+                    >
+                        {h}
+                    </span>
+                ))}
+            </div>
+
+            {/* Tech tags */}
+            <div className="flex flex-wrap gap-1.5">
+                {exp.tech.map((t) => (
+                    <span
+                        key={t}
+                        className="font-mono text-[10px] px-2 py-0.5 rounded"
+                        style={{
+                            color: 'var(--color-text-2)',
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '1px solid var(--color-border)',
+                        }}
+                    >
+                        {t}
+                    </span>
+                ))}
+            </div>
+        </div>
+    </motion.div>
+);
+
+/* ── Experience Section ── */
 const Experience = () => {
     const [activeIndex, setActiveIndex] = useState(0);
+    const timelineRef = useRef<HTMLDivElement>(null);
 
     return (
         <section id="experience" className="section-padding relative overflow-hidden">
-            <div className="absolute bottom-1/3 left-0 w-80 h-80 bg-violet-600/5 rounded-full blur-[120px]" />
-            <div className="absolute top-1/4 right-0 w-60 h-60 bg-cyan-500/5 rounded-full blur-[100px]" />
-
-            <div className="max-w-6xl mx-auto relative z-10">
+            <div className="max-w-5xl mx-auto relative z-10">
                 <SectionHeading
+                    index="04"
                     title="Experience"
-                    subtitle="My professional journey and key milestones"
-                    icon={<FiBriefcase />}
+                    subtitle="Where I've built and what I've shipped"
                 />
 
-                {/* Stats Bar */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-12"
-                >
-                    {[
-                        { label: 'Years Active', value: '4+', color: '#8b5cf6' },
-                        { label: 'Projects Built', value: '28+', color: '#06b6d4' },
-                        { label: 'Technologies', value: '16+', color: '#10b981' },
-                    ].map((stat, i) => (
-                        <motion.div
-                            key={stat.label}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: i * 0.1 }}
-                            className="text-center p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-all"
-                            whileHover={{ y: -4 }}
-                        >
-                            <motion.div
-                                className="text-3xl font-heading font-bold mb-1"
-                                style={{ color: stat.color }}
-                                initial={{ scale: 0 }}
-                                whileInView={{ scale: 1 }}
-                                viewport={{ once: true }}
-                                transition={{ type: 'spring', stiffness: 200, delay: i * 0.1 + 0.2 }}
-                            >
-                                {stat.value}
-                            </motion.div>
-                            <div className="text-xs text-gray-500 font-medium uppercase tracking-wider">
-                                {stat.label}
-                            </div>
-                        </motion.div>
-                    ))}
-                </motion.div>
+                {/* Timeline container */}
+                <div ref={timelineRef} className="relative">
+                    <TimelineLine containerRef={timelineRef} />
 
-                {/* Bento Grid */}
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {experiences.map((exp, i) => (
-                        <ExperienceCard
+                        <ExperienceEntry
                             key={i}
                             exp={exp}
                             index={i}
                             isActive={activeIndex === i}
-                            onClick={() => setActiveIndex(i)}
+                            onClick={() => setActiveIndex(activeIndex === i ? -1 : i)}
                         />
                     ))}
                 </div>
